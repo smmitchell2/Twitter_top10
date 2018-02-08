@@ -2,6 +2,7 @@ from twitter import *
 import re
 import json
 import datetime
+from collections import Counter
 
 
 #-----------------------------------------------------------------------
@@ -57,12 +58,15 @@ def cleanStream(tweets_filename):
             if 'text' in tweet: # only messages contains 'text' field is a tweet
                 #print tweet['id'] # This is the tweet's id
                 #print tweet['created_at'] # when the tweet posted
+                tweets_clean_file.write('\n')
                 tweets_clean_file.write(tweet['text']) # content of the tweet
-
+                tweets_clean_file.write('\n')
                 hashtags = []
                 for hashtag in tweet['entities']['hashtags']:
             	    hashtags.append(hashtag['text'])
-                tweets_clean_file.write(hashtags)
+                #print(Counter(hashtags).most_common()[:10])
+                tweets_clean_file.write('#' + hashtags)
+                print(Counter(hashtags).most_common()[:10])
 
         except:
             # read in a line is not in JSON format (sometimes error occured)
