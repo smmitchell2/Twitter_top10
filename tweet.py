@@ -25,7 +25,7 @@ iterator = twitter_stream.statuses.sample()
 
 tweets_filename = 'stream.txt'
 tweets_file = open(tweets_filename, "r")
-
+hashtags = []
 # Print each tweet in the stream to the screen 
 # Here we set it to stop after getting 1000 tweets. 
 # You don't have to set it to stop, but can continue running 
@@ -50,7 +50,7 @@ def cleanStream(tweets_filename):
     tweets_filename = 'stream.txt'
     tweets_file = open(tweets_filename, "r")
     tweets_clean_file = open(tweets_clean_filename,"w")
-
+    
     for line in tweets_file:
         try:
             # Read in one line of the file, convert it into a json object 
@@ -61,14 +61,13 @@ def cleanStream(tweets_filename):
                 #tweets_clean_file.write('\n')
                 #tweets_clean_file.write(tweet['text']) # content of the tweet
                 #tweets_clean_file.write('\n')
-                hashtags = []
+                
                 for hashtag in tweet['entities']['hashtags']:
                     tweets_clean_file.write('#'+hashtag['text'])
                     tweets_clean_file.write('\n')
             	    hashtags.append(hashtag['text'])
                 #print(Counter(hashtags).most_common()[:10])
                 #tweets_clean_file.write('#' + hashtags)
-                print(Counter(hashtags).most_common()[:10])
 
         except:
             # read in a line is not in JSON format (sometimes error occured)
@@ -76,3 +75,5 @@ def cleanStream(tweets_filename):
 
 collectStream(iterator,tweets_file)
 cleanStream(tweets_filename)
+print Counter(hashtags).most_common()[:10]
+print ('\n'.join(map(str, hashtags)))
