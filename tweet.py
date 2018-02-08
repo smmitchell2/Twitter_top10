@@ -1,21 +1,8 @@
-#!/usr/bin/python
-
-#-----------------------------------------------------------------------
-# twitter-trends
-#  - lists the current global trending topics
-#-----------------------------------------------------------------------
+from twitter import *
+import re
 import json
 import datetime
 
-from twitter import *
-
-class tweetClass:
-    name = ""
-    count = ""
-
-    def __init__(name,count):
-        self.name = name
-        self.count = count
 
 #-----------------------------------------------------------------------
 # load our API credentials 
@@ -26,34 +13,60 @@ execfile("config.py", config)
 #-----------------------------------------------------------------------
 # create twitter API object
 #-----------------------------------------------------------------------
-twitter = Twitter(
-		        auth = OAuth(config["access_key"], config["access_secret"], config["consumer_key"], config["consumer_secret"]))
+auth = OAuth(config["access_key"], config["access_secret"], config["consumer_key"], config["consumer_secret"])
+stream = TwitterStream(auth = auth, secure = True)
 
+# Initiate the connection to Twitter Streaming API
+twitter_stream = TwitterStream(auth=auth)
 
-#-----------------------------------------------------------------------
-# retrieve global trends.
-# other localised trends can be specified by looking up WOE IDs:
-#   http://developer.yahoo.com/geo/geoplanet/
-# twitter API docs: https://dev.twitter.com/rest/reference/get/trends/place
-#-----------------------------------------------------------------------
+# Get a sample of the public data following through Twitter
+iterator = twitter_stream.statuses.sample()
 
-#it finds top 50 in 24hrs in random order
-results = twitter.trends.place(_id = 1)
+tweets_filename = 'stream.txt'
+tweets_file = open(tweets_filename, "r")
 
-print "World Trends"
-top_trends = []
-lowest_count = 0
-for location in results:
-	for trend in location["trends"]:
-		print " - %s %s" % (trend["name"],trend["tweet_volume"])
-#print(top_trends)
-"""
- if top_trends.count == 0:
-            tw = tweetClass(trend["name"],trend["tweet_volume"])
-            top_trends.append(tw)
-            lowest_count = int(trend["tweet_volume"])
-        else:
-            if int(trend["tweet_volume"]) >= lowest_count:
-                tw = tweetClass(trend["name"],trend["tweet_volume"])
-                top_trends.append(tw)
-"""
+# Print each tweet in the stream to the screen 
+# Here we set it to stop after getting 1000 tweets. 
+# You don't have to set it to stop, but can continue running 
+# the Twitter API to collect data for days or even longer. 
+def collectStream(iterator,tweets_file):
+    tweet_count = 1000
+    for tweet in iterator:
+        tweet_count -= 1
+    # Twitter Python Tool wraps the data returned by Twitter 
+    # as a TwitterDictResponse object.
+    # We convert it back to the JSON format to print/score
+        print json.dumps(tweet)  
+    
+    # The command below will do pretty printing for JSON data, try it out
+    # print json.dumps(tweet, indent=4)
+       
+        if tweet_count <= 0:
+            break
+
+def cleanStream(tweets_filename):
+    tweets_clean_filename = 'cleanStream.txt'
+    tweets_filename = 'stream.txt'
+    tweets_file = open(tweets_filename, "r")
+    tweets_clean_file = open(tweets_clean_filename,"w")
+
+    for line in tweets_file:
+        try:
+            # Read in one line of the file, convert it into a json object 
+            tweet = json.loads(line.strip())
+            if 'text' in tweet: # only messages contains 'text' field is a tweet
+                #print tweet['id'] # This is the tweet's id
+                #print tweet['created_at'] # when the tweet posted
+                tweets_clean_file.write(tweet['text']) # content of the tweet
+
+                hashtags = []
+                for hashtag in tweet['entities']['hashtags']:
+            	    hashtags.append(hashtag['text'])
+                tweets_clean_file.write(hashtags)
+
+        except:
+            # read in a line is not in JSON format (sometimes error occured)
+            continue
+
+collectStream(iterator,tweets_file)
+cleanStream(tweets_filename)

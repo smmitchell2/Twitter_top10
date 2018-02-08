@@ -4,7 +4,7 @@
 #	https://apps.twitter.com/app/new
 #--------------------------------------------------------------------------------
 
-consumer_key = "consumer key"
-consumer_secret = "secret key"
-access_key = "access key"
-access_secret = "secret key"
+consumer_key = "key"
+consumer_secret = "secret"
+access_key = "key"
+access_secret = "secret"
