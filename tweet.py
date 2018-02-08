@@ -65,7 +65,8 @@ def cleanStream(tweets_filename):
                 for hashtag in tweet['entities']['hashtags']:
                     tweets_clean_file.write('#'+hashtag['text'])
                     tweets_clean_file.write('\n')
-            	    hashtags.append(hashtag['text'])
+                    #word = hashtag['text']
+            	    #hashtags.append(word)
                 #print(Counter(hashtags).most_common()[:10])
                 #tweets_clean_file.write('#' + hashtags)
 
@@ -73,7 +74,16 @@ def cleanStream(tweets_filename):
             # read in a line is not in JSON format (sometimes error occured)
             continue
 
+def readHashtagFile(tweets_clean_filename):
+    with open(tweets_clean_filename) as file:
+        for line in file:
+            line = line.strip()
+            hashtags.append(line)
+
 collectStream(iterator,tweets_file)
 cleanStream(tweets_filename)
+tweets_clean_filename = 'cleanStream.txt'
+readHashtagFile(tweets_clean_filename)
+print hashtags
 print Counter(hashtags).most_common()[:10]
 print ('\n'.join(map(str, hashtags)))
