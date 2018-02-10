@@ -2,6 +2,7 @@ from twitter import *
 import re
 import json
 import datetime
+import time
 from collections import Counter
 
 
@@ -26,15 +27,18 @@ iterator = twitter_stream.statuses.sample()
 tweets_filename = 'stream.txt'
 
 hashtags = []
+currentTime = time.time()
+endTime = time.time() + 600
 # Print each tweet in the stream to the screen 
 # Here we set it to stop after getting 1000 tweets. 
 # You don't have to set it to stop, but can continue running 
 # the Twitter API to collect data for days or even longer. 
 def collectStream(iterator,tweets_filename):
     tweets_file = open(tweets_filename, "w")
-    tweet_count = 1000
+    #tweet_count = 10000
+    
     for tweet in iterator:
-        tweet_count -= 1
+        #tweet_count -= 1
     # Twitter Python Tool wraps the data returned by Twitter 
     # as a TwitterDictResponse object.
     # We convert it back to the JSON format to print/score
@@ -43,8 +47,8 @@ def collectStream(iterator,tweets_filename):
     
     # The command below will do pretty printing for JSON data, try it out
     # print json.dumps(tweet, indent=4)
-       
-        if tweet_count <= 0:
+        currentTime = time.time()
+        if currentTime >= endTime:
             break
 
 def cleanStream(tweets_filename):
@@ -58,19 +62,10 @@ def cleanStream(tweets_filename):
             # Read in one line of the file, convert it into a json object 
             tweet = json.loads(line.strip())
             if 'text' in tweet: # only messages contains 'text' field is a tweet
-                #print tweet['id'] # This is the tweet's id
-                #print tweet['created_at'] # when the tweet posted
-                #tweets_clean_file.write('\n')
-                #tweets_clean_file.write(tweet['text']) # content of the tweet
-                #tweets_clean_file.write('\n')
                 
                 for hashtag in tweet['entities']['hashtags']:
                     tweets_clean_file.write(hashtag['text'])
                     tweets_clean_file.write('\n')
-                    #word = hashtag['text']
-            	    #hashtags.append(word)
-                #print(Counter(hashtags).most_common()[:10])
-                #tweets_clean_file.write('#' + hashtags)
 
         except:
             # read in a line is not in JSON format (sometimes error occured)
