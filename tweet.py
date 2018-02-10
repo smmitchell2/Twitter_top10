@@ -24,20 +24,22 @@ twitter_stream = TwitterStream(auth=auth)
 iterator = twitter_stream.statuses.sample()
 
 tweets_filename = 'stream.txt'
-tweets_file = open(tweets_filename, "r")
+
 hashtags = []
 # Print each tweet in the stream to the screen 
 # Here we set it to stop after getting 1000 tweets. 
 # You don't have to set it to stop, but can continue running 
 # the Twitter API to collect data for days or even longer. 
-def collectStream(iterator,tweets_file):
+def collectStream(iterator,tweets_filename):
+    tweets_file = open(tweets_filename, "w")
     tweet_count = 1000
     for tweet in iterator:
         tweet_count -= 1
     # Twitter Python Tool wraps the data returned by Twitter 
     # as a TwitterDictResponse object.
     # We convert it back to the JSON format to print/score
-        print json.dumps(tweet)  
+        tweets_file.write(json.dumps(tweet))
+        tweets_file.write('\n')
     
     # The command below will do pretty printing for JSON data, try it out
     # print json.dumps(tweet, indent=4)
@@ -63,7 +65,7 @@ def cleanStream(tweets_filename):
                 #tweets_clean_file.write('\n')
                 
                 for hashtag in tweet['entities']['hashtags']:
-                    tweets_clean_file.write('#'+hashtag['text'])
+                    tweets_clean_file.write(hashtag['text'])
                     tweets_clean_file.write('\n')
                     #word = hashtag['text']
             	    #hashtags.append(word)
@@ -80,10 +82,9 @@ def readHashtagFile(tweets_clean_filename):
             line = line.strip()
             hashtags.append(line)
 
-collectStream(iterator,tweets_file)
+collectStream(iterator,tweets_filename)
 cleanStream(tweets_filename)
 tweets_clean_filename = 'cleanStream.txt'
 readHashtagFile(tweets_clean_filename)
-print hashtags
 print Counter(hashtags).most_common()[:10]
-print ('\n'.join(map(str, hashtags)))
+#print ('\n'.join(map(str, hashtags)))
